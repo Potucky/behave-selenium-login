@@ -1,0 +1,9 @@
+customer_id,full_name,email,phone,country_code,segment_code,status_code,credit_limit,source_updated_at
+C001,Alice Nguyen,alice@example.com,4155550101,US,R,A,1000.00,2026-01-22T10:00:00Z
+C002,Bob Singh,bob.singh@example.com,4155550102,US,W,A,5000.00,2026-01-22T10:00:00Z
+C003,Cara Diaz,cara@example.com,442075550103,GB,P,A,2600.50,2026-01-22T10:00:00Z
+C004,Dan Okonkwo,dan@example.com,14165550104,CA,R,I,750.00,2026-01-22T10:00:00Z
+C013,Helen Cho,helen@example.com,821055550108,KR,P,A,8000.00,2026-01-22T10:00:00Z
+C002,Bob Singh,bob.stale@example.com,4155550102,US,W,A,5000.00,2026-01-21T10:00:00Z
+C014,Bad Phone,badphone@example.com,123,US,R,A,10.00,2026-01-22T10:00:00Z
+C010,Frank Müller,frank.replay@example.com,33155550106,FR,W,A,4200.00,2026-01-10T09:00:00Z

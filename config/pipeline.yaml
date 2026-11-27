@@ -1,0 +1,13 @@
+# Sample customer dimension.
+# Paths are relative to the repository root unless an environment variable overrides them.
+# ETL_CONFIG, ETL_SOURCE_DIR, ETL_TARGET_DB, ETL_REPORT_DIR
+source_dir: data/source
+source_glob: customers_*.csv
+lookups:
+  countries: data/lookups/countries.csv
+  segments: data/lookups/segments.csv
+  statuses: data/lookups/statuses.csv
+target_db: data/target/warehouse.duckdb
+report_dir: reports
+# Half-open SCD ranges: a current row is effective until this sentinel date.
+open_ended_date: "9999-12-31"
