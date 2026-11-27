@@ -1,0 +1,91 @@
+name: pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run tests and write the HTML reports
+        env:
+          PYTHONPATH: src
+        run: |
+          mkdir -p reports
+          python -m pytest --junitxml=reports/junit.xml --html=reports/pytest.html --self-contained-html
+          python -m etl_validation run
+          python -m etl_validation reconcile
+
+      - name: Assemble the Pages site
+        run: |
+          mkdir -p site
+          cp reports/pytest.html site/pytest.html
+          cp reports/reconciliation.html site/reconciliation.html
+          cat > site/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>ETL source-to-target validation</title>
+            <style>
+              body { font-family: Helvetica, Arial, sans-serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1.25rem; color: #1c1c1c; line-height: 1.5; }
+              a { color: #0b3d91; }
+              .note { color: #555; }
+            </style>
+          </head>
+          <body>
+            <h1>ETL source-to-target validation</h1>
+            <p class="note">Portfolio demo, not employer code. Synthetic customer files only. Published by GitHub Actions after the tests on main pass.</p>
+            <ul>
+              <li><a href="pytest.html">HTML test report</a></li>
+              <li><a href="reconciliation.html">Source-to-target reconciliation report</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: report
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      actions: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
