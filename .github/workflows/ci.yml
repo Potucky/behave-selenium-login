@@ -1,0 +1,55 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run tests
+        env:
+          PYTHONPATH: src
+        run: |
+          mkdir -p reports
+          python -m pytest --junitxml=reports/junit.xml --html=reports/pytest.html --self-contained-html
+
+      - name: Rebuild the sample warehouse and reconciliation report
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m etl_validation run
+          python -m etl_validation reconcile
+
+      - name: Upload test and reconciliation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            reports/junit.xml
+            reports/pytest.html
+            reports/reconciliation.html
+            reports/reconciliation.md
+          if-no-files-found: error

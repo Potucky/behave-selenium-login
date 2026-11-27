@@ -1,0 +1,14 @@
+customer_id,full_name,email,phone,country_code,segment_code,status_code,credit_limit,source_updated_at
+C001,Alice Nguyen,alice@example.com,4155550101,US,R,A,1000.00,2026-01-15T10:00:00Z
+C002,Bob Singh,bob@example.com,4155550102,US,W,A,5000.00,2026-01-15T10:00:00Z
+C003,Cara Diaz,cara@example.com,442075550103,GB,P,A,"2,500.50",2026-01-15T10:00:00Z
+C004,Dan Okonkwo,dan@example.com,14165550104,CA,R,A,750.00,2026-01-15T10:00:00Z
+C005,Eva Rossi,eva.old@example.com,39065550105,IT,R,A,100.00,2026-01-14T08:00:00Z
+C005,Eva Rossi,eva@example.com,39065550105,IT,R,A,300.00,2026-01-15T11:00:00Z
+C010,Frank Müller,frank@example.com,33155550106,FR,W,A,4200.00,2026-01-15T09:00:00Z
+C011,  grace   hopper ,GRACE@EXAMPLE.COM,(415) 555-0107,US,R,A,$1500.00,2026-01-15T12:00:00Z
+C006,Bad Email,not-an-email,4155550199,US,R,A,10.00,2026-01-15T12:00:00Z
+,Missing Id,missing@example.com,4155550188,US,R,A,10.00,2026-01-15T12:00:00Z
+C008,Negative Limit,neg@example.com,4155550177,US,R,A,-5.00,2026-01-15T12:00:00Z
+C007,Unknown Country,zz@example.com,4155550166,ZZ,R,A,10.00,2026-01-15T12:00:00Z
+C012,Unknown Segment,seg@example.com,4155550155,US,Q,A,10.00,2026-01-15T12:00:00Z
