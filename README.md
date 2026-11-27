@@ -1,12 +1,22 @@
 # ETL Source-to-Target Validation
 
-[![tests](https://github.com/Potucky/behave-selenium-login/actions/workflows/ci.yml/badge.svg)](https://github.com/Potucky/behave-selenium-login/actions/workflows/ci.yml)
+[![tests](https://github.com/Potucky/etl-source-to-target-validation/actions/workflows/ci.yml/badge.svg)](https://github.com/Potucky/etl-source-to-target-validation/actions/workflows/ci.yml)
+
+[Live test report](https://potucky.github.io/etl-source-to-target-validation/)
 
 Portfolio demo for QA Automation / Data QA review. Two synthetic customer files are cleaned, deduplicated, and loaded into a DuckDB dimension with SCD Type 2. A pytest suite then reconciles that warehouse to the source: row counts, an attribute checksum, column diffs, mapping and type checks, duplicate handling, and the SCD history.
 
 This is not employer code. The files in `data/` are synthetic. Nothing here connects to a production warehouse, and the repository contains no credentials.
 
-## What this demonstrates
+## What this project demonstrates
+
+- **SQL data validation.** Queries against the loaded DuckDB dimension check one current row per customer, non-overlapping and contiguous SCD2 ranges, lookup domains, and stored formats for email, phone, country, amount, and dates.
+- **ETL source-to-target reconciliation.** The expected SCD2 history is folded in Python, separate from the SQL load. A miss names the customer, column, expected value, and actual value.
+- **Data-quality rules.** Cleaning, a stable reject reason, quarantine, which duplicate survives, and per-batch control totals are all asserted.
+- **Negative tests.** A tampered email, a non-numeric phone, a segment outside the lookup, and an overlapping effective range are each caught by the check that should fail.
+- **CI test reports.** GitHub Actions runs the suite on every push and pull request and uploads JUnit XML plus a self-contained HTML report.
+
+## How the checks are built
 
 - A small but explicit ETL contract: what is rejected, which duplicate wins, and when a change opens a new dimension version.
 - Source-to-target reconciliation that fails with the customer, column, expected value, and actual value.
@@ -25,7 +35,7 @@ This is not employer code. The files in `data/` are synthetic. Nothing here conn
 | pytest | Unit and integration checks |
 | pytest-html | Self-contained HTML test report |
 | PyYAML | Pipeline configuration |
-| GitHub Actions | Test run on push and pull request |
+| GitHub Actions | Test run on push and pull request; HTML report published on `main` |
 
 DuckDB is the warehouse in this demo. The checks are the kind you would point at Snowflake or PostgreSQL: counts, checksums, domain lookups, and effective-date invariants. This project does not ship a Snowflake connector.
 
@@ -79,6 +89,8 @@ src/etl_validation/
   cli.py                      `run` and `reconcile`
 tests/                        unit rules plus the loaded sample warehouse
 .github/workflows/ci.yml      pytest, then the sample report, uploaded as an artifact
+.github/workflows/pages.yml   on main, publish the HTML reports to GitHub Pages
+docs/                         screenshots of the sample reports
 ```
 
 Warehouse tables:
@@ -168,6 +180,8 @@ The checksum is an aggregate, so it tells you the current image moved. `current_
 
 47 tests, no sleeps, no network. `pytest -m unit` stays on the cleaning rules. `pytest -m integration` rebuilds the warehouse in a temporary DuckDB file.
 
+![Pytest HTML report from a local run, 47 passed](docs/pytest-report.png)
+
 Covered:
 
 - Normalization and the reject priority, including a bad duplicate that must not block a valid row
@@ -192,6 +206,8 @@ Not covered, and not claimed:
 
 CI (`.github/workflows/ci.yml`) runs on every push and pull request, on Python 3.12. It runs pytest with JUnit XML and a self-contained HTML report, rebuilds the sample warehouse, writes the reconciliation report, and uploads all four files as the `test-reports` artifact. The badge tracks that workflow on the default branch.
 
+A push to `main` also runs `.github/workflows/pages.yml`. That workflow repeats the test run and deploys `pytest.html`, the reconciliation report, and an `index.html` that links to them. The [live test report](https://potucky.github.io/etl-source-to-target-validation/) is that site. The page is unavailable until the first successful deploy from `main`.
+
 ## Reconciliation checks
 
 | Check | What it compares |
@@ -211,3 +227,7 @@ CI (`.github/workflows/ci.yml`) runs on every push and pull request, on Python 3
 | `control_totals` | Per-batch counts and the accepted-row checksum |
 
 The attribute hash is SHA-256 over the tracked fields, joined with an ASCII unit separator. Credit limit is formatted with two decimal places before it is hashed. The business key is not part of the hash; it is part of the aggregate checksum.
+
+## Author
+
+Vasyl Popovich, QA Automation Engineer, Miami, FL. GitHub: https://github.com/Potucky
